@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【導入済み企業様向け】役員社宅 「乗り換え」メリット最大化シミュレーター</title>
+    <title>【導入済み企業様向け】役員社宅 追加メリットシミュレーター</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -338,7 +338,13 @@
 
             // 6. お得な期間（損益分岐点）の計算
             const initialBenefit = keyMoneyCorpSavings + personalCfImprovementKeyMoney;
-            const advantageousMonths = gpServiceFee > 0 ? initialBenefit / gpServiceFee : Infinity;
+            
+            const monthlyCorpTaxSavingOnOpex = (gpServiceFee + UTILITY_COST_MONTHLY) * CORPORATE_TAX_RATE;
+            const monthlyPersonalCfSavingOnOpex = (UTILITY_COST_MONTHLY * grossUpFactor) - UTILITY_COST_MONTHLY;
+            const monthlyTotalBenefit = monthlyCorpTaxSavingOnOpex + monthlyPersonalCfSavingOnOpex;
+            const netMonthlyCost = gpServiceFee - monthlyTotalBenefit;
+            
+            const advantageousMonths = netMonthlyCost > 0 ? initialBenefit / netMonthlyCost : Infinity;
 
             // --- Display Results ---
             totalSavingsEl.textContent = formatCurrency(ceilToNearestTen(totalTwoYearSavings));
@@ -358,9 +364,9 @@
                 手取りで ${formatCurrency(personalBurdenUtilities)}円を支払うには、税引前で約 <strong>${formatCurrency(ceilToNearestTen(requiredGrossUtilities))}円</strong> の報酬が必要です。<br>
                 効果額 (差額): ${formatCurrency(ceilToNearestTen(personalCfImprovementUtilities))}円`;
             breakevenDetailsEl.innerHTML = `<strong>初期メリット合計 (A):</strong> ${formatCurrency(ceilToNearestTen(initialBenefit))}円<br>
-                                           <span class="text-xs ml-4">(② 礼金節税効果 + ③ 可処分所得効果の礼金反映分)</span><br><br>
-                                           <strong>月々の純粋なコスト増 (B):</strong> ${formatCurrency(ceilToNearestTen(gpServiceFee))}円<br>
-                                           <span class="text-xs ml-4">(サービス料のみ)</span><br><br>
+                                           <span class="text-xs ml-4">(② ${formatCurrency(ceilToNearestTen(keyMoneyCorpSavings))}円 + ③の礼金反映分 ${formatCurrency(ceilToNearestTen(personalCfImprovementKeyMoney))}円)</span><br><br>
+                                           <strong>実質の月額負担増 (B):</strong> ${formatCurrency(ceilToNearestTen(netMonthlyCost))}円<br>
+                                           <span class="text-xs ml-4">(サービス料 ${formatCurrency(gpServiceFee)}円 - 月々の法人税節税 ${formatCurrency(ceilToNearestTen(monthlyCorpTaxSavingOnOpex))}円 - 月々の個人CF改善 ${formatCurrency(ceilToNearestTen(monthlyPersonalCfSavingOnOpex))}円)</span><br><br>
                                            <strong>計算式:</strong> (A) ÷ (B)`;
 
             resultsSection.classList.add('show');
